@@ -3,55 +3,31 @@
 typedef struct Node 
 {
     int coeff;
-    int exp;
+    int expo;
     struct Node* next;
 } Node;
-Node* createNode(int coeff, int exp) 
+Node* createNode(int coeff, int expo) 
 {
     Node* newNode = (Node*)malloc(sizeof(Node));
     newNode->coeff = coeff;
-    newNode->exp = exp;
+    newNode->expo = expo;
     newNode->next = NULL;
     return newNode;
 }
-void insertTerm(Node** poly, int coeff, int exp) 
+void insertTerm(Node** poly, int coeff, int expo) 
 {
-    Node* newNode = createNode(coeff, exp);
-    if (*poly == NULL || (*poly)->exp < exp) 
+    Node* newNode = createNode(coeff, expo);
+    if (*poly == NULL) 
     {
-        newNode->next = *poly;
         *poly = newNode;
         return;
     }
     Node* temp = *poly;
-    Node* prev = NULL;
-    while (temp != NULL && temp->exp > exp)
-     {
-        prev = temp;
+    while (temp->next != NULL)
         temp = temp->next;
-    }
-    if (temp != NULL && temp->exp == exp) 
-    {
-        temp->coeff += coeff;
-        free(newNode);
-        if (temp->coeff == 0) 
-        {
-            if (prev == NULL) 
-            {
-                *poly = temp->next;
-            } else {
-                prev->next = temp->next;
-            }
-            free(temp);
-        }
-    } else 
-    {
-        newNode->next = temp;
-        if (prev != NULL)
-            prev->next = newNode;
-    }
+    temp->next = newNode;
 }
-void printPoly(Node* poly) 
+void displayPoly(Node* poly) 
 {
     if (poly == NULL) 
     {
@@ -60,79 +36,71 @@ void printPoly(Node* poly)
     }
     while (poly != NULL) 
     {
-        if (poly->coeff > 0 && poly != poly)
-            printf("+");
-        if (poly->exp == 0)
-            printf("%d", poly->coeff);
-        else if (poly->exp == 1)
-            printf("%dx ", poly->coeff);
-        else
-            printf("%dx^%d ", poly->coeff, poly->exp);
-
+        printf("%dx^%d", poly->coeff, poly->expo);
         poly = poly->next;
+        if (poly != NULL)
+            printf(" + ");
     }
     printf("\n");
 }
-Node* addPoly(Node* poly1, Node* poly2) 
+Node* addPolynomials(Node* poly1, Node* poly2) 
 {
     Node* result = NULL;
     while (poly1 != NULL && poly2 != NULL) 
     {
-        if (poly1->exp > poly2->exp) 
-        {
-            insertTerm(&result, poly1->coeff, poly1->exp);
+        if (poly1->expo > poly2->expo) {
+            insertTerm(&result, poly1->coeff, poly1->expo);
             poly1 = poly1->next;
-        } else if (poly1->exp < poly2->exp) 
-        {
-            insertTerm(&result, poly2->coeff, poly2->exp);
+        } else if (poly1->expo < poly2->expo) {
+            insertTerm(&result, poly2->coeff, poly2->expo);
             poly2 = poly2->next;
-        } else 
-        {
-            int sum = poly1->coeff + poly2->coeff;
-            if (sum != 0)
-                insertTerm(&result, sum, poly1->exp);
+        } else {
+            int sumCoeff = poly1->coeff + poly2->coeff;
+            if (sumCoeff != 0) {
+                insertTerm(&result, sumCoeff, poly1->expo);
+            }
             poly1 = poly1->next;
             poly2 = poly2->next;
         }
     }
-    while (poly1 != NULL) 
-    {
-        insertTerm(&result, poly1->coeff, poly1->exp);
+    while (poly1 != NULL) {
+        insertTerm(&result, poly1->coeff, poly1->expo);
         poly1 = poly1->next;
     }
-    while (poly2 != NULL) 
-    {
-        insertTerm(&result, poly2->coeff, poly2->exp);
+
+    while (poly2 != NULL) {
+        insertTerm(&result, poly2->coeff, poly2->expo);
         poly2 = poly2->next;
     }
+
     return result;
 }
-Node* createPoly() 
-{
-    int n, coeff, exp;
-    Node* poly = NULL;
-    printf("Enter number of terms: ");
-    scanf("%d", &n);
-    for (int i = 0; i < n; i++) 
+int main() {
+    Node* poly1 = NULL;
+    Node* poly2 = NULL;
+    Node* sum = NULL;
+    int n1,n2,n3,n4,i;
+    printf("Enter the number of elements :");
+    scanf("%d",&n1);
+    for (i=0;i<n1;i++)
     {
-        printf("Enter coefficient and exponent of term %d: ", i + 1);
-        scanf("%d%d", &coeff, &exp);
-        insertTerm(&poly, coeff, exp);
+        scanf("%d %d",&n2,&n3);
+        insertTerm(&poly1, n2, n3);
     }
-    return poly;
-}
-int main() 
-{
-    printf("Enter first polynomial:\n");
-    Node* poly1 = createPoly();
-    printf("Enter second polynomial:\n");
-    Node* poly2 = createPoly();
-    printf("First Polynomial: ");
-    printPoly(poly1);
-    printf("Second Polynomial: ");
-    printPoly(poly2);
-    Node* sum = addPoly(poly1, poly2);
-    printf("Sum of polynomials: ");
-    printPoly(sum);
+    printf("Enter the number of elements :");
+    scanf("%d",&n4);
+    for (i=0;i<n4;i++)
+    {
+        scanf("%d %d",&n2,&n3);
+        insertTerm(&poly2, n2, n3);
+    }
+    displayPoly(poly1);
+    displayPoly(poly2);
+
+    sum = addPolynomials(poly1, poly2);
+
+    printf("Sum: ");
+    displayPoly(sum);
+
     return 0;
 }
